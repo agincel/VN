@@ -25,6 +25,42 @@
         <arguments>
           <argument>
             <kind>1</kind>
+            <string>///Enum define
+
+enum textboxType {
+    plain = 0,
+    yesno = 1,
+    option = 2
+}
+
+enum textboxPortrait {
+    none = 0,
+    left = 1,
+    right = 2,
+    center = 3
+}
+
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
             <string>///Creation
 
 image_index = spr_textbox_bg;
@@ -33,11 +69,16 @@ font = fnt_monospaced;
 currentColor = c_white;
 
 text = "This is a long, multiline debug message. It should have a lot of words as to check on this text box's multiline capabilities. I wonder just how much text will fit into this text box; probably a lot.";
-//text = "first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first first";
-//text = "123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456 123456";
 currentCharacter = 0;
 
 textbox_speed = 2;
+
+type = textboxType.plain;
+portrait = textboxPortrait.none;
+
+//my sprite subimg tracker
+mySubimg = 0;
+myCounter = 0;
 </string>
           </argument>
         </arguments>
@@ -71,7 +112,67 @@ if (currentCharacter &lt;= string_length(text))
         </arguments>
       </action>
     </event>
+    <event eventtype="7" enumb="10">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///Received A button
+
+if (currentCharacter &lt;= string_length(text))
+{
+    alarm[0] = -1;
+    currentCharacter = string_length(text) + 1;
+}
+else
+{
+    if (type == textboxType.plain)
+    {
+        instance_destroy();
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
     <event eventtype="8" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///increment sprite indices
+
+myCounter = (myCounter + 1) % 24;
+mySubimg = floor(myCounter / 2);
+</string>
+          </argument>
+        </arguments>
+      </action>
       <action>
         <libid>1</libid>
         <id>603</id>
@@ -126,9 +227,17 @@ for (var i = 1; i &lt; currentCharacter; i++)
     currentLineCharacter += 1;
 }
 
-if (alarm[0] &lt;= 0) 
+if (currentCharacter &lt;= string_length(text) &amp;&amp; alarm[0] &lt;= 0) //increment character
 {
     alarm[0] = textbox_speed;
+}
+
+if (currentCharacter &gt; string_length(text)) //print next arrow, yes/no, dialogue, etc
+{
+    if (type == textboxType.plain)
+    {
+        draw_sprite_ext(spr_textbox_next, mySubimg, x + sprite_get_xoffset(image_index) - (startingPointOffsetX * 1.5), y + sprite_get_yoffset(image_index) - (startingPointOffsetY * .5), 0.5, 0.5, 0, c_white, 0.75);
+    }
 }
 </string>
           </argument>
