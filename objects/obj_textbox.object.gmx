@@ -69,16 +69,89 @@ font = fnt_monospaced;
 currentColor = c_white;
 
 text = "This is a long, multiline debug message. It should have a lot of words as to check on this text box's multiline capabilities. I wonder just how much text will fit into this text box; probably a lot.";
+textArray = "";
+textArray[0] = "";
+currentText = 0;
 currentCharacter = 0;
 
 textbox_speed = 2;
 
 type = textboxType.plain;
-portrait = textboxPortrait.none;
+portraitType = textboxPortrait.right;
+portrait = spr_example_portrait;
+name = "Debug"; //if portrait, define name
 
 //my sprite subimg tracker
 mySubimg = 0;
 myCounter = 0;
+
+//portrait fade in
+fadeAlpha = 0;
+fadeMax = seconds(0.1);
+
+//spacing
+characterSpace = font_get_size(font) - 2;
+lineSpace = font_get_size(font) + 14;
+charsPerLine = 60; //guess, redefined in draw
+startingPointOffsetX = 30;
+startingPointOffsetY = 36;
+
+alarm[1] = 1; //break up text if needed
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="2" enumb="1">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///runs after getting defined -- split string
+
+var curr = 0;
+var numLines = ceil((sprite_get_height(image_index) - (startingPointOffsetY * 2)) / lineSpace);
+var chars = numLines * charsPerLine;
+chars -= 8; //test
+
+var lastSpace = 0; //index of last space
+var i = 0;
+var startingPlace = 1;
+
+while(startingPlace &lt; string_length(text))
+{
+    textArray[curr] = "";
+    var lastLastSpace = lastSpace;
+    for(i = startingPlace; i &lt; startingPlace + chars &amp;&amp; i &lt;= string_length(text); i++) //find last space
+    {
+        if (string_char_at(text, i) == " ")
+        {
+            lastSpace = i;
+        }
+    }
+    
+    if (i == string_length(text) + 1)
+        lastSpace = string_length(text) + 1;
+        
+    textArray[curr] = substring(text, startingPlace, lastSpace - startingPlace);
+    startingPlace = lastSpace + 1;
+
+    curr += 1;
+}
+
+text = textArray[0];
 </string>
           </argument>
         </arguments>
@@ -136,10 +209,21 @@ if (currentCharacter &lt;= string_length(text))
     alarm[0] = -1;
     currentCharacter = string_length(text) + 1;
 }
-else
+else //textbox is done
 {
-    if (type == textboxType.plain)
+    if (currentText &lt; array_length_1d(textArray) - 1) 
     {
+        currentText += 1;
+        text = textArray[currentText];
+        currentCharacter = 0;
+    }
+    else if (type == textboxType.plain) //go to next conv item, and destroy
+    {
+        if (global.conversationIndex &lt; array_length_1d(global.conversation) - 1)
+        {
+            global.conversationIndex += 1;
+            create_textbox_by_object(global.conversation[global.conversationIndex]);
+        }
         instance_destroy();
     }
 }
@@ -165,10 +249,13 @@ else
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>///increment sprite indices
+            <string>///increment sprite indices and transparency lerp
 
 myCounter = (myCounter + 1) % 24;
 mySubimg = floor(myCounter / 2);
+
+if (fadeAlpha &lt; fadeMax)
+    fadeAlpha += 1;
 </string>
           </argument>
         </arguments>
@@ -191,15 +278,13 @@ mySubimg = floor(myCounter / 2);
             <kind>1</kind>
             <string>///Add to text
 
-var startingPointOffsetX = 30;
-var startingPointOffsetY = 36;
+startingPointOffsetX = 30;
+startingPointOffsetY = 36;
 
+characterSpace = font_get_size(font) - 2;
+lineSpace = font_get_size(font) + 14;
 
-
-var characterSpace = font_get_size(font) - 2;
-var lineSpace = font_get_size(font) + 14;
-
-var charsPerLine = floor((sprite_get_width(image_index) - (startingPointOffsetX * 2)) / characterSpace);
+charsPerLine = floor((sprite_get_width(image_index) - (startingPointOffsetX * 2)) / characterSpace);
 
 draw_set_font(font);
 draw_set_color(currentColor);
@@ -232,12 +317,94 @@ if (currentCharacter &lt;= string_length(text) &amp;&amp; alarm[0] &lt;= 0) //in
     alarm[0] = textbox_speed;
 }
 
+
+
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///draw next arrow
+
 if (currentCharacter &gt; string_length(text)) //print next arrow, yes/no, dialogue, etc
 {
     if (type == textboxType.plain)
     {
         draw_sprite_ext(spr_textbox_next, mySubimg, x + sprite_get_xoffset(image_index) - (startingPointOffsetX * 1.5), y + sprite_get_yoffset(image_index) - (startingPointOffsetY * .5), 0.5, 0.5, 0, c_white, 0.75);
     }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///Portrait Logic
+
+var nameBgY = topLeftY - (sprite_get_height(spr_textbox_name_bg) / 2);
+var nameBgX = 0;
+
+var distanceMultiplier = 3;
+
+if (portraitType == textboxPortrait.left)
+{
+    //name bg origin is centered
+    //show_debug_message("trying to draw left portrait");
+    nameBgX = topLeftX + (sprite_get_width(spr_textbox_name_bg) / 2);
+    draw_sprite_ext(portrait, 0, nameBgX - ((distanceMultiplier * fadeMax) - (distanceMultiplier * fadeAlpha)), topLeftY, 1, 1, 0, c_white, fadeAlpha / fadeMax);
+    draw_sprite(spr_textbox_name_bg, 0, nameBgX, nameBgY);
+    draw_set_color(c_white);
+    draw_text(nameBgX, nameBgY, name);
+}
+else if (portraitType == textboxPortrait.right)
+{
+    //show_debug_message("trying to draw right portrait");
+    nameBgX = topLeftX + sprite_get_width(image_index) - (sprite_get_width(spr_textbox_name_bg) / 2);
+    
+    
+    draw_sprite_ext(portrait, 0, nameBgX + ((distanceMultiplier * fadeMax) - (distanceMultiplier * fadeAlpha)), topLeftY, -1, 1, 0, c_white, fadeAlpha / fadeMax);
+    draw_sprite(spr_textbox_name_bg, 0, nameBgX, nameBgY);
+    draw_set_color(c_white);
+    draw_text(nameBgX, nameBgY, name);
+}
+else if (portraitType == textboxPortrait.center)
+{
+    nameBgX = x;
+    
+    draw_sprite_ext(portrait, 0, nameBgX, topLeftY, 1, 1, 0, c_white, fadeAlpha / fadeMax);
+    draw_sprite(spr_textbox_name_bg, 0, nameBgX, nameBgY);
+    draw_set_color(c_white);
+    draw_text(nameBgX, nameBgY, name);
 }
 </string>
           </argument>

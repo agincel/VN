@@ -6,25 +6,43 @@
   <NewExtensions/>
   <sounds name="sound"/>
   <sprites name="sprites">
-    <sprite>sprites\spr_textbox_bg</sprite>
-    <sprite>sprites\spr_textbox_next</sprite>
+    <sprites name="textbox">
+      <sprite>sprites\spr_textbox_bg</sprite>
+      <sprite>sprites\spr_textbox_name_bg</sprite>
+      <sprite>sprites\spr_textbox_next</sprite>
+      <sprite>sprites\spr_example_portrait</sprite>
+    </sprites>
   </sprites>
   <backgrounds name="background">
     <background>background\background0</background>
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
-    <script>scripts\create_textbox.gml</script>
     <scripts name="obj_textbox">
       <script>scripts\word_breaks_line.gml</script>
+      <script>scripts\create_textbox.gml</script>
+      <script>scripts\start_conversation.gml</script>
+      <script>scripts\create_textbox_by_object.gml</script>
+      <script>scripts\create_obj_conversation_ext.gml</script>
+      <script>scripts\create_obj_conversation.gml</script>
+    </scripts>
+    <scripts name="Conversations">
+      <script>scripts\test_conversation.gml</script>
+    </scripts>
+    <scripts name="Misc">
+      <script>scripts\seconds.gml</script>
+      <script>scripts\substring.gml</script>
     </scripts>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fnt_monospaced</font>
   </fonts>
   <objects name="objects">
-    <object>objects\obj_textbox</object>
     <object>objects\obj_player</object>
+    <objects name="textbox">
+      <object>objects\obj_textbox</object>
+      <object>objects\obj_conversation</object>
+    </objects>
   </objects>
   <rooms name="rooms">
     <room>rooms\rm_test</room>
