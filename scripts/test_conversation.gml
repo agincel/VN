@@ -1,13 +1,18 @@
-///test_conversation()
-
+///test_conversation(yesNoOrDialogueIndex, yesNoDialogueAnswer)
+//second option only necessary if dialogue answer
 var conv = -1;
+if (argument[0] == -1) //initial
+{
+    conv[0] = create_struct_conversation_ext(fnt_monospaced, c_white, "Why ^cbhello^cw there! This^9.^9.^9.^9^9^9is an ^bexample^w conversation.", 2, textboxType.plain, textboxPortrait.none, "", "");
+    conv[1] = create_struct_conversation_plain("I ^eshave^en a portrait!", textboxPortrait.left, spr_example_portrait, "Bob");
+    conv[2] = create_struct_conversation_plain("I'm an asshole!", textboxPortrait.right, spr_example_portrait, "Josh");
+    conv[3] = create_struct_conversation_yesno("My portrait is in the middle -- it's special. Now, tell me. Yes or no?", test_conversation, textboxPortrait.center, spr_example_portrait2, "Charlie");
+    conv[4] = create_struct_conversation_plain("Yes, you say? Very interesting.", textboxPortrait.center, spr_example_portrait2, "Charlie");
+}
+else if (argument[0] == 3 && global.conversationLevel == 1) //said no on conversation Level 0 index 3
+{
+    conv[0] = create_struct_conversation_plain("No. Hm. What a shame.", textboxPortrait.center, spr_example_portrait2, "Charlie");
+}
 
-conv[0] = create_obj_conversation("Why hello there! This is an example conversation.", textboxType.plain, textboxPortrait.none, "", "");
-conv[1] = create_obj_conversation("I have a portrait!", textboxType.plain, textboxPortrait.left, spr_example_portrait, "Bob");
-conv[2] = create_obj_conversation("I also have a portrait!", textboxType.plain, textboxPortrait.right, spr_example_portrait, "Alice");
-conv[3] = create_obj_conversation("My portrait is in the middle -- it's special.", textboxType.plain, textboxPortrait.center, spr_example_portrait, "Charlie");
-conv[4] = create_obj_conversation_ext(fnt_monospaced, c_red, "What the fuck did you just fucking say about me, you little bitch? I'll have you know I graduated top of my class in the Navy Seals, and I've been involved in numerous secret raids on Al-Quaeda, and I have over 300 confirmed kills. I am trained in gorilla warfare and I'm the top sniper in the entire US armed forces. You are nothing to me but just another target. I will wipe you the fuck out with precision the likes of which has never been seen before on this Earth, mark my fucking words. You think you can get away with saying that shit to me over the Internet? Think again, fucker. As we speak I am contacting my secret network of spies across the USA and your IP is being traced right now so you better prepare for the storm, maggot. The storm that wipes out the pathetic little thing you call your life. You're fucking dead, kid. I can be anywhere, anytime, and I can kill you in over seven hundred ways, and that's just with my bare hands. Not only am I extensively trained in unarmed combat, but I have access to the entire arsenal of the United States Marine Corps and I will use it to its full extent to wipe your miserable ass off the face of the continent, you little shit. If only you could have known what unholy retribution your little “clever” comment was about to bring down upon you, maybe you would have held your fucking tongue. But you couldn't, you didn't, and now you're paying the price, you goddamn idiot. I will shit fury all over you and you will drown in it. You're fucking dead, kiddo.", 1, textboxType.plain, textboxPortrait.left, spr_example_portrait, "Navy SEAL");
 
-
-
-start_conversation(conv);
+start_conversation(conv, -1);

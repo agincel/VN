@@ -67,6 +67,7 @@ image_index = spr_textbox_bg;
 
 font = fnt_monospaced;
 currentColor = c_white;
+initialColor = currentColor;
 
 text = "This is a long, multiline debug message. It should have a lot of words as to check on this text box's multiline capabilities. I wonder just how much text will fit into this text box; probably a lot.";
 textArray = "";
@@ -96,6 +97,10 @@ charsPerLine = 60; //guess, redefined in draw
 startingPointOffsetX = 30;
 startingPointOffsetY = 36;
 
+//yesno
+noScript = test_conversation;
+yesSelected = true;
+
 alarm[1] = 1; //break up text if needed
 </string>
           </argument>
@@ -120,6 +125,11 @@ alarm[1] = 1; //break up text if needed
           <argument>
             <kind>1</kind>
             <string>///runs after getting defined -- split string
+
+initialColor = currentColor;
+
+global.lastPortrait = portrait;
+global.lastPortraitType = portraitType;
 
 var curr = 0;
 var numLines = ceil((sprite_get_height(image_index) - (startingPointOffsetY * 2)) / lineSpace);
@@ -185,6 +195,68 @@ if (currentCharacter &lt;= string_length(text))
         </arguments>
       </action>
     </event>
+    <event eventtype="7" enumb="12">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///down
+
+if (currentText == array_length_1d(textArray) - 1 &amp;&amp; currentCharacter &gt; string_length(text))
+{
+    if (type == textboxType.yesno)
+    {
+        yesSelected = !yesSelected;
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="7" enumb="11">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///up
+
+if (currentText == array_length_1d(textArray) - 1 &amp;&amp; currentCharacter &gt; string_length(text))
+{
+    if (type == textboxType.yesno)
+    {
+        yesSelected = !yesSelected;
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
     <event eventtype="7" enumb="10">
       <action>
         <libid>1</libid>
@@ -223,6 +295,28 @@ else //textbox is done
         {
             global.conversationIndex += 1;
             create_textbox_by_object(global.conversation[global.conversationIndex]);
+        }
+        else
+        {
+            if(global.convEndScript != -1)
+                script_execute(global.convEndScript);
+        }
+        instance_destroy();
+    }
+    else if (type == textboxType.yesno)
+    {
+        if (yesSelected)
+        {
+            if (global.conversationIndex &lt; array_length_1d(global.conversation) - 1)
+            {
+                global.conversationIndex += 1;
+                create_textbox_by_object(global.conversation[global.conversationIndex]);
+            }
+        }
+        else
+        {
+            global.conversationLevel += 1;
+            script_execute(noScript, global.conversationIndex);
         }
         instance_destroy();
     }
@@ -287,7 +381,7 @@ lineSpace = font_get_size(font) + 14;
 charsPerLine = floor((sprite_get_width(image_index) - (startingPointOffsetX * 2)) / characterSpace);
 
 draw_set_font(font);
-draw_set_color(currentColor);
+currentColor = initialColor;
 
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
@@ -302,53 +396,94 @@ var currentLine = 0;
 
 draw_sprite(image_index, 0, x, y);
 var currentLineCharacter = 0;
+
+
+//escape flags
+var drawCharacter = true;
+var nextDelay = textbox_speed;
+var shakeEffect = false;
+var shakeX = 0;
+var shakeY = 0;
+
 for (var i = 1; i &lt; currentCharacter; i++)
 {
+    draw_set_color(currentColor);  
+    nextDelay = textbox_speed;
+    drawCharacter = true;
+    shakeX = 0;
+    shakeY = 0;
+
     if (i &gt; 0 &amp;&amp; string_char_at(text, i - 1) == " " &amp;&amp; word_breaks_line(text, i, currentLineCharacter, charsPerLine)){
         currentLine += 1;
         currentLineCharacter = 0;
     }
-    draw_text(textStartX + (currentLineCharacter * characterSpace), textStartY + (currentLine * lineSpace), string_char_at(text, i));
-    currentLineCharacter += 1;
+    else if (string_char_at(text, i) == "^") //escape sequences
+    {
+        while(string_char_at(text, i) == "^")
+        {
+            i += 1;
+            if (currentCharacter &lt;= i)
+                currentCharacter += 1;
+            if (string_digits(string_char_at(text, i)) != "") //add to delay
+            {
+                drawCharacter = false;
+                nextDelay += real(string_char_at(text, i));
+                i -= 1; //compensate for character skip after this block
+            }
+            else if (string_char_at(text, i) == "e") //change active effect
+            {
+                i += 1;
+                if (currentCharacter &lt;= i)
+                    currentCharacter += 1;
+                
+                if (string_char_at(text, i) == "n") //no effect
+                {
+                    shakeEffect = false;
+                }
+                else if (string_char_at(text, i) == "s") //shake effect
+                {
+                    shakeEffect = true;
+                }
+            }
+            else if (string_char_at(text, i) == "c") //change color
+            {
+                i += 1;
+                if (currentCharacter &lt;= i)
+                    currentCharacter += 1;
+            
+                if (string_char_at(text, i) == "w")
+                    currentColor = c_white;
+                else if (string_char_at(text, i) == "b")
+                    currentColor = c_blue;
+            }
+            
+            draw_set_color(currentColor);
+            i += 1; //skip the escaped character
+            if (currentCharacter &lt;= i)
+                currentCharacter += 1;
+        }
+       // show_message("Character about to display: " + string_char_at(text, i));
+    }
+    if (drawCharacter) {
+        if (shakeEffect)
+        {
+            shakeX = irandom_range(-1, 1);
+            shakeY = irandom_range(-1, 1);
+        }
+        draw_text(textStartX + (currentLineCharacter * characterSpace) + shakeX, textStartY + (currentLine * lineSpace) + shakeY, string_char_at(text, i));
+        currentLineCharacter += 1;
+    }
+    
 }
 
 if (currentCharacter &lt;= string_length(text) &amp;&amp; alarm[0] &lt;= 0) //increment character
 {
-    alarm[0] = textbox_speed;
+    alarm[0] = nextDelay;
 }
 
 
 
 
-</string>
-          </argument>
-        </arguments>
-      </action>
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>///draw next arrow
-
-if (currentCharacter &gt; string_length(text)) //print next arrow, yes/no, dialogue, etc
-{
-    if (type == textboxType.plain)
-    {
-        draw_sprite_ext(spr_textbox_next, mySubimg, x + sprite_get_xoffset(image_index) - (startingPointOffsetX * 1.5), y + sprite_get_yoffset(image_index) - (startingPointOffsetY * .5), 0.5, 0.5, 0, c_white, 0.75);
-    }
-}
 </string>
           </argument>
         </arguments>
@@ -405,6 +540,54 @@ else if (portraitType == textboxPortrait.center)
     draw_sprite(spr_textbox_name_bg, 0, nameBgX, nameBgY);
     draw_set_color(c_white);
     draw_text(nameBgX, nameBgY, name);
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///Plain, Yesno, Options
+
+if (currentCharacter &gt; string_length(text)) //print next arrow, yes/no, dialogue, etc
+{
+    if (type == textboxType.plain)
+    {
+        draw_sprite_ext(spr_textbox_next, mySubimg, x + sprite_get_xoffset(image_index) - (startingPointOffsetX * 1.5), y + sprite_get_yoffset(image_index) - (startingPointOffsetY * .5), 0.5, 0.5, 0, c_white, 0.75);
+    }
+    else if (type == textboxType.yesno) //draw yesno dialogue
+    {
+        if(portraitType != textboxPortrait.right)
+            var yesnoX = topLeftX + sprite_get_width(image_index) - (sprite_get_width(spr_textbox_yesno_bg) / 2);
+        else
+            var yesnoX = topLeftX + (sprite_get_width(spr_textbox_yesno_bg) / 2);
+        var yesnoY = topLeftY - (sprite_get_height(spr_textbox_yesno_bg) / 2);
+        
+        draw_sprite(spr_textbox_yesno_bg, 0, yesnoX, yesnoY);
+        draw_set_color(c_white);
+        
+        draw_text(yesnoX, yesnoY - (lineSpace / 1.5), "Yes");
+        draw_text(yesnoX, yesnoY + (lineSpace / 1.5), "No");
+        
+        if (yesSelected)
+            draw_sprite(spr_textbox_yesno_highlight, 0, yesnoX, yesnoY - (lineSpace / 1.5));
+        else
+            draw_sprite(spr_textbox_yesno_highlight, 0, yesnoX, yesnoY + (lineSpace / 1.5));
+    }
 }
 </string>
           </argument>

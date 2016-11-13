@@ -7,9 +7,9 @@
   <coltolerance>0</coltolerance>
   <sepmasks>0</sepmasks>
   <bboxmode>0</bboxmode>
-  <bbox_left>48</bbox_left>
-  <bbox_right>170</bbox_right>
-  <bbox_top>131</bbox_top>
+  <bbox_left>0</bbox_left>
+  <bbox_right>255</bbox_right>
+  <bbox_top>54</bbox_top>
   <bbox_bottom>445</bbox_bottom>
   <HTile>0</HTile>
   <VTile>0</VTile>
@@ -20,6 +20,6 @@
   <width>256</width>
   <height>512</height>
   <frames>
-    <frame index="0">images\spr_example_portrait_0.png</frame>
+    <frame index="0">images\spr_port_meme_james_0.png</frame>
   </frames>
 </sprite>

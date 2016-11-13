@@ -7,10 +7,20 @@
   <sounds name="sound"/>
   <sprites name="sprites">
     <sprites name="textbox">
-      <sprite>sprites\spr_textbox_bg</sprite>
-      <sprite>sprites\spr_textbox_name_bg</sprite>
-      <sprite>sprites\spr_textbox_next</sprite>
-      <sprite>sprites\spr_example_portrait</sprite>
+      <sprites name="TextboxBG">
+        <sprite>sprites\spr_textbox_bg</sprite>
+        <sprite>sprites\spr_textbox_name_bg</sprite>
+        <sprite>sprites\spr_textbox_yesno_bg</sprite>
+        <sprite>sprites\spr_textbox_yesno_highlight</sprite>
+        <sprite>sprites\spr_textbox_next</sprite>
+      </sprites>
+      <sprites name="Portraits">
+        <sprite>sprites\spr_example_portrait</sprite>
+        <sprite>sprites\spr_example_portrait2</sprite>
+        <sprite>sprites\spr_port_meme_james</sprite>
+        <sprite>sprites\spr_port_meme_nick</sprite>
+        <sprite>sprites\spr_port_meme_taber</sprite>
+      </sprites>
     </sprites>
   </sprites>
   <backgrounds name="background">
@@ -23,11 +33,14 @@
       <script>scripts\create_textbox.gml</script>
       <script>scripts\start_conversation.gml</script>
       <script>scripts\create_textbox_by_object.gml</script>
-      <script>scripts\create_obj_conversation_ext.gml</script>
-      <script>scripts\create_obj_conversation.gml</script>
+      <script>scripts\create_struct_conversation.gml</script>
+      <script>scripts\csc.gml</script>
     </scripts>
     <scripts name="Conversations">
       <script>scripts\test_conversation.gml</script>
+      <script>scripts\conv_gj9.gml</script>
+      <script>scripts\test_conversation_navy.gml</script>
+      <script>scripts\test_conversation_yesno.gml</script>
     </scripts>
     <scripts name="Misc">
       <script>scripts\seconds.gml</script>
@@ -41,7 +54,7 @@
     <object>objects\obj_player</object>
     <objects name="textbox">
       <object>objects\obj_textbox</object>
-      <object>objects\obj_conversation</object>
+      <object>objects\struct_conversation</object>
     </objects>
   </objects>
   <rooms name="rooms">

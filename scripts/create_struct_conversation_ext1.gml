@@ -1,6 +1,6 @@
-///create_obj_conversation_ext(fnt, color, text, speed, type, pType, portrait, name)
+///create_struct_conversation_ext1(fnt, color, text, speed, type, pType, portrait, name)
 
-var newC = instance_create(-1, -1, obj_conversation);
+var newC = instance_create(-1, -1, struct_conversation);
 
 newC.font = argument[0];
 newC.currentColor = argument[1];
